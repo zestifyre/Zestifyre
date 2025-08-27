@@ -25,7 +25,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 ### **Tech Stack**
 - **Frontend**: Next.js with React (TypeScript)
 - **Backend**: Next.js API routes
-- **Database**: Airtable
+- **Database**: Supabase (PostgreSQL)
 - **AI Image Generation**: DALL-E 3 API
 - **Email Service**: Gmail SMTP with Nodemailer
 - **Hosting**: Vercel
@@ -34,8 +34,9 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 ### **Estimated Monthly Costs**
 - DALL-E 3 API: ~$150-300 (depending on usage)
 - Vercel Pro: $20/month
+- Supabase Pro: $25/month (after free tier)
 - Email service: ~$10-20/month
-- **Total**: ~$180-340/month
+- **Total**: ~$205-365/month
 
 ---
 
@@ -80,12 +81,12 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 - **Retry Logic**: 3 attempts with exponential backoff
 - **Error Handling**: "Sorry, please try again later" message
 
-### **2. Data Storage (Airtable)**
+### **2. Data Storage (Supabase)**
 **Tables Structure:**
-- **Users**: email, restaurant_name, created_at, status
-- **Restaurants**: name, uber_eats_url, scraped_at, menu_items_count
-- **Menu Items**: restaurant_id, name, description, price, category, has_image
-- **Generated Images**: user_id, menu_item_id, image_url, status, created_at
+- **users**: email, restaurant_name, created_at, status
+- **restaurants**: name, uber_eats_url, scraped_at, menu_items_count
+- **menu_items**: restaurant_id, name, description, price, category, has_image
+- **generated_images**: user_id, menu_item_id, image_url, status, created_at
 
 ### **3. Image Generation Priority**
 - **Selection Criteria**: Most expensive OR most popular item
@@ -151,14 +152,15 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - [x] Create basic folder structure
   - **Testing**: ✅ Verified project runs locally, TypeScript compilation works
 
-- [ ] **Task 1.2**: Configure Airtable database
-  - [ ] Create Airtable account and workspace
-  - [ ] Set up Users table
-  - [ ] Set up Restaurants table
-  - [ ] Set up Menu Items table
-  - [ ] Set up Generated Images table
-  - [ ] Configure API access
-  - **Testing**: Verify database connection, CRUD operations work
+- [x] **Task 1.2**: Configure Supabase database ✅ COMPLETED
+  - [x] Set up Supabase project (linked to GitHub)
+  - [x] Create users table with proper schema
+  - [x] Create restaurants table with proper schema
+  - [x] Create menu_items table with proper schema
+  - [x] Create generated_images table with proper schema
+  - [x] Set up Row Level Security (RLS) policies
+  - [x] Configure API access and environment variables
+  - **Testing**: ✅ Verified database connection, CRUD operations work
 
 - [ ] **Task 1.3**: Set up Vercel deployment
   - [ ] Connect GitHub repository to Vercel
