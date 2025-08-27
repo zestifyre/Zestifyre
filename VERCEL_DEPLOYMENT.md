@@ -58,7 +58,7 @@ Add the same variables for the preview environment.
 
 1. Click **"Deploy"**
 2. Wait for the build to complete
-3. Your project will be deployed to: `https://zeptifier.vercel.app` (or similar)
+3. Your project will be deployed to: `https://zestifyre.vercel.app/`
 
 ## Step 5: Configure Custom Domain (Optional)
 
