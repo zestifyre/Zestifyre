@@ -10,6 +10,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 3. **Progress Tracking**: Always reference this document to determine current project status
 4. **Quality Gates**: No task is considered complete until testing is verified
 5. **Documentation**: All completed tasks must be marked as "✅ COMPLETED" in this document
+6. **Repository Privacy**: All GitHub repositories should be private by default (by invitation only)
 
 ### **Core Value Proposition**
 - Generate professional-quality food images using AI
