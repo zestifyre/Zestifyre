@@ -1,5 +1,5 @@
 import { ApifyClient } from 'apify-client';
-import { RestaurantSearchResult, SearchOptions } from '../types/uberEats';
+import { RestaurantSearchResult, SearchOptions } from './uberEatsSearch';
 
 export class ApifySearchEngine {
   private client: ApifyClient;
@@ -17,7 +17,7 @@ export class ApifySearchEngine {
    */
   async searchRestaurants(
     restaurantName: string,
-    options: SearchOptions = {}
+    _options: SearchOptions = {}
   ): Promise<RestaurantSearchResult[]> {
     try {
       console.log(`🔍 Apify: Searching for "${restaurantName}"`);
@@ -47,7 +47,7 @@ export class ApifySearchEngine {
 
       const results: RestaurantSearchResult[] = [];
 
-      for (const item of items) {
+      for (const item of items as { url?: string }[]) {
         const url = item.url;
         if (url && url.includes('ubereats.com/ca/store/')) {
           console.log(`✅ Found UberEats URL: ${url}`);

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { RestaurantSearchResult, SearchOptions } from '../types/uberEats';
+import { RestaurantSearchResult, SearchOptions } from './uberEatsSearch';
 
 export class DuckDuckGoSearchEngine {
   private baseUrl = 'https://html.duckduckgo.com/html/';
@@ -9,7 +9,7 @@ export class DuckDuckGoSearchEngine {
    */
   async searchRestaurants(
     restaurantName: string,
-    options: SearchOptions = {}
+    _options: SearchOptions = {}
   ): Promise<RestaurantSearchResult[]> {
     try {
       console.log(`🔍 DuckDuckGo: Searching for "${restaurantName}"`);
@@ -47,10 +47,10 @@ export class DuckDuckGoSearchEngine {
     } catch (error) {
       console.error('❌ DuckDuckGo search failed:', error);
       console.error('❌ Error details:', {
-        message: (error as any).message,
-        code: (error as any).code,
-        status: (error as any).response?.status,
-        statusText: (error as any).response?.statusText
+        message: (error as Error).message,
+        code: (error as { code?: string }).code,
+        status: (error as { response?: { status?: number } }).response?.status,
+        statusText: (error as { response?: { statusText?: string } }).response?.statusText
       });
       return [];
     }

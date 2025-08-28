@@ -36,7 +36,7 @@ export default function TestScrapingPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isScraping, setIsScraping] = useState(false);
   const [error, setError] = useState('');
-  const [errorDetails, setErrorDetails] = useState<any>(null);
+  const [errorDetails, setErrorDetails] = useState<Record<string, unknown> | null>(null);
   const [searchStatus, setSearchStatus] = useState<string>('');
 
   const testSearch = async () => {
@@ -238,12 +238,12 @@ export default function TestScrapingPage() {
         {(selectedRestaurant || menuData) && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              🍽️ Component 2: Menu Scraper (Task 1.6 - IN PROGRESS) - {selectedRestaurant.name}
+              🍽️ Component 2: Menu Scraper (Task 1.6 - IN PROGRESS) - {selectedRestaurant?.name || 'No restaurant selected'}
             </h2>
             
             {isScraping && (
               <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700">
-                <p>🔍 Scraping menu data from: {selectedRestaurant.url}</p>
+                <p>🔍 Scraping menu data from: {selectedRestaurant?.url || 'No URL available'}</p>
                 <p className="text-sm mt-1">This may take a few seconds...</p>
               </div>
             )}

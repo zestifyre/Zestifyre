@@ -55,7 +55,7 @@ export class UberEatsSearchEngine {
    */
   private async realSearch(
     restaurantName: string, 
-    options: SearchOptions
+    _options: SearchOptions
   ): Promise<RestaurantSearchResult[]> {
     console.log(`🔍 Trying search methods for "${restaurantName}"`);
     
@@ -77,9 +77,9 @@ export class UberEatsSearchEngine {
         } else {
           console.log(`⚠️ ${searchMethod.name} returned no results`);
         }
-      } catch (error) {
-        console.error(`❌ ${searchMethod.name} search failed:`, error);
-      }
+              } catch (_error) {
+          console.error(`❌ ${searchMethod.name} search failed:`, _error);
+        }
     }
     
     console.log(`❌ All search methods failed for "${restaurantName}"`);
@@ -234,10 +234,10 @@ export class UberEatsSearchEngine {
     } catch (error) {
       console.error('❌ DuckDuckGo search failed:', error);
       console.error('❌ Error details:', {
-        message: (error as any).message,
-        code: (error as any).code,
-        status: (error as any).response?.status,
-        statusText: (error as any).response?.statusText
+        message: (error as Error).message,
+        code: (error as { code?: string }).code,
+        status: (error as { response?: { status?: number } }).response?.status,
+        statusText: (error as { response?: { statusText?: string } }).response?.statusText
       });
       return [];
     }

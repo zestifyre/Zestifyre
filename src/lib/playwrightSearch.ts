@@ -1,5 +1,5 @@
 import { chromium, Browser, Page } from 'playwright';
-import { RestaurantSearchResult, SearchOptions } from '../types/uberEats';
+import { RestaurantSearchResult, SearchOptions } from './uberEatsSearch';
 
 export class PlaywrightSearchEngine {
   private browser: Browser | null = null;
@@ -57,7 +57,7 @@ export class PlaywrightSearchEngine {
    */
   private async performSearch(
     restaurantName: string, 
-    options: SearchOptions
+    _options: SearchOptions
   ): Promise<RestaurantSearchResult[]> {
     const browser = await this.getBrowser();
     const page = await browser.newPage();
@@ -134,14 +134,14 @@ export class PlaywrightSearchEngine {
         
         // Log first few links to see what we're getting
         Array.from(allLinks).slice(0, 10).forEach((link, i) => {
-          console.log(`Link ${i + 1}: ${link.href}`);
+          console.log(`Link ${i + 1}: ${(link as HTMLAnchorElement).href}`);
         });
         
         // Also try to find any search results
         const searchResults = document.querySelectorAll('h3, .g, [data-sokoban-container]');
         console.log(`Search result containers found: ${searchResults.length}`);
         
-        return Array.from(links).map(link => link.href);
+        return Array.from(links).map(link => (link as HTMLAnchorElement).href);
       });
       
       // Also get page title and URL for debugging

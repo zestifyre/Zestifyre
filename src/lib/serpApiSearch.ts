@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { RestaurantSearchResult, SearchOptions } from '../types/uberEats';
+import { RestaurantSearchResult, SearchOptions } from './uberEatsSearch';
 
 export class SerpApiSearchEngine {
   private apiKey: string;
@@ -14,7 +14,7 @@ export class SerpApiSearchEngine {
    */
   async searchRestaurants(
     restaurantName: string,
-    options: SearchOptions = {}
+    _options: SearchOptions = {}
   ): Promise<RestaurantSearchResult[]> {
     try {
       console.log(`🔍 SerpAPI: Searching for "${restaurantName}"`);
@@ -44,13 +44,13 @@ export class SerpApiSearchEngine {
         const results: RestaurantSearchResult[] = [];
         
         // Filter for UberEats URLs
-        const uberEatsResults = response.data.organic_results.filter((result: any) => 
+        const uberEatsResults = response.data.organic_results.filter((result: { link?: string }) => 
           result.link && result.link.includes('ubereats.com/ca/store/')
         );
 
         console.log(`🔗 Found ${uberEatsResults.length} UberEats results from SerpAPI`);
 
-        uberEatsResults.slice(0, 3).forEach((result: any, index: number) => {
+        uberEatsResults.slice(0, 3).forEach((result: { link: string }, index: number) => {
           console.log(`  ${index + 1}. ${result.link}`);
           
           results.push({
