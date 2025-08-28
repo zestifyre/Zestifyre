@@ -66,7 +66,7 @@ export class DiscordLogger {
   /**
    * Log search engine activity
    */
-  async logSearch(restaurantName: string, results: any[], method: string, duration: number) {
+  async logSearch(restaurantName: string, results: unknown[], method: string, duration: number) {
     const success = results.length > 0;
     const level = success ? 'success' : 'warn';
     

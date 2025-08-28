@@ -56,7 +56,6 @@ export class UberEatsScraper {
         console.log(`✅ Successfully scraped ${menu.menuItems.length} menu items`);
         
         // Log successful scraping to Discord
-        const duration = Date.now() - startTime;
         await discordLogger.logScraper(restaurantUrl, menu.menuItems.length, true);
         
         return menu;
@@ -74,7 +73,6 @@ export class UberEatsScraper {
     }
     
     // Log failed scraping to Discord
-    const duration = Date.now() - startTime;
     await discordLogger.logScraper(restaurantUrl, 0, false);
     
     throw new Error(`Failed to scrape restaurant menu after ${this.maxRetries} attempts: ${lastError?.message}`);

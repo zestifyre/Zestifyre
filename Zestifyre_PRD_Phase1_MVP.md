@@ -13,6 +13,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 6. **Repository Privacy**: All GitHub repositories should be private by default (by invitation only)
 7. **Readability First**: Always prioritize text readability - ensure sufficient contrast between text and background colors, especially for input fields and form elements
 8. **Enter Key Functionality**: When creating input boxes, hitting Enter should perform the most logical next action. Consider: "nothing", "next field", "search", "submit". Examples: Search inputs should trigger search, form inputs should submit the form, multi-field forms should move to next field.
+9. **Build Error Prevention**: Always run `npm run build` locally before pushing to GitHub to catch TypeScript/ESLint errors. Common issues: `any` types, unused variables, missing imports. Fix these immediately to prevent Vercel deployment failures.
 
 ### **Core Value Proposition**
 - Generate professional-quality food images using AI
