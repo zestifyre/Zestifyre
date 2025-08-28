@@ -27,28 +27,25 @@ export class UberEatsSearchEngine {
    * @returns Promise<RestaurantSearchResult[]>
    */
   async searchRestaurants(
-    restaurantName: string, 
+    restaurantName: string,
     options: SearchOptions = {}
   ): Promise<RestaurantSearchResult[]> {
     try {
       console.log(`🔍 Searching for restaurant: "${restaurantName}"`);
-      
-      // Try real search first
       const results = await this.realSearch(restaurantName, options);
-      
+
       if (results.length > 0) {
         console.log(`✅ Found ${results.length} restaurants for "${restaurantName}"`);
         return results;
       }
-      
-      // Fallback to mock search if real search fails
-      console.log(`⚠️ Real search failed, using mock data for "${restaurantName}"`);
-      return await this.mockSearch(restaurantName, options);
-      
+
+      console.log(`❌ No restaurants found for "${restaurantName}"`);
+      return [];
+
     } catch (error) {
       console.error('❌ Error searching restaurants:', error);
-      console.log(`⚠️ Falling back to mock data for "${restaurantName}"`);
-      return await this.mockSearch(restaurantName, options);
+      console.log(`❌ Search failed for "${restaurantName}"`);
+      return [];
     }
   }
 
@@ -66,16 +63,22 @@ export class UberEatsSearchEngine {
       try {
         console.log(`🔍 Real search attempt ${attempt}/${this.maxRetries} for "${restaurantName}"`);
         
-        // Method 1: Try direct URL construction (for known restaurants)
-        const directResults = await this.tryDirectUrl(restaurantName);
-        if (directResults.length > 0) {
-          return directResults;
+        // Method 1: Try Playwright search (bypasses bot detection)
+        const playwrightResults = await this.searchViaPlaywright(restaurantName);
+        if (playwrightResults.length > 0) {
+          return playwrightResults;
         }
         
-        // Method 2: Try Google search for UberEats URLs
-        const googleResults = await this.searchViaGoogle(restaurantName);
-        if (googleResults.length > 0) {
-          return googleResults;
+        // Method 2: Try SerpAPI search (reliable API service)
+        const serpApiResults = await this.searchViaSerpAPI(restaurantName);
+        if (serpApiResults.length > 0) {
+          return serpApiResults;
+        }
+        
+        // Method 3: Try DuckDuckGo search for UberEats URLs (fallback)
+        const duckDuckGoResults = await this.searchViaDuckDuckGo(restaurantName);
+        if (duckDuckGoResults.length > 0) {
+          return duckDuckGoResults;
         }
         
         // Method 3: Try UberEats search page scraping (if we can access it)
@@ -122,11 +125,10 @@ export class UberEatsSearchEngine {
         `${this.baseUrl}/ca/store/${cleanName}-downtown`,
         `${this.baseUrl}/ca/store/${cleanName}-uptown`
       ];
+
+      // No hardcoded URLs - let the search engines find them dynamically
       
-      // Add specific known patterns
-      if (restaurantName.toLowerCase().includes('bao house')) {
-        possibleUrls.unshift('https://www.ubereats.com/ca/store/bao-housenorth-york/asnz-rOyQg2LrGchrWtqwg?diningMode=DELIVERY');
-      }
+
       
       const results: RestaurantSearchResult[] = [];
       
@@ -164,15 +166,64 @@ export class UberEatsSearchEngine {
   }
 
   /**
-   * Search for UberEats URLs via Google
+   * Search for UberEats URLs via Playwright (bypasses bot detection)
    * @private
    */
-  private async searchViaGoogle(restaurantName: string): Promise<RestaurantSearchResult[]> {
+  private async searchViaPlaywright(restaurantName: string): Promise<RestaurantSearchResult[]> {
     try {
-      const searchQuery = `${restaurantName} site:ubereats.com`;
-      const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+      console.log(`🔍 Playwright: Searching for "${restaurantName}"`);
       
-      const response = await axios.get(googleSearchUrl, {
+      // Import PlaywrightSearchEngine dynamically to avoid issues
+      const { PlaywrightSearchEngine } = await import('./playwrightSearch');
+      const searchEngine = new PlaywrightSearchEngine();
+      
+      const results = await searchEngine.searchRestaurants(restaurantName);
+      
+      // Clean up
+      await searchEngine.close();
+      
+      return results;
+      
+    } catch (error) {
+      console.error('❌ Playwright search failed:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Search for UberEats URLs via SerpAPI (reliable API service)
+   * @private
+   */
+  private async searchViaSerpAPI(restaurantName: string): Promise<RestaurantSearchResult[]> {
+    try {
+      console.log(`🔍 SerpAPI: Searching for "${restaurantName}"`);
+      
+      // Import SerpApiSearchEngine dynamically to avoid issues
+      const { SerpApiSearchEngine } = await import('./serpApiSearch');
+      const searchEngine = new SerpApiSearchEngine();
+      
+      const results = await searchEngine.searchRestaurants(restaurantName);
+      
+      return results;
+      
+    } catch (error) {
+      console.error('❌ SerpAPI search failed:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Search for UberEats URLs via DuckDuckGo (free, less aggressive bot detection)
+   * @private
+   */
+  private async searchViaDuckDuckGo(restaurantName: string): Promise<RestaurantSearchResult[]> {
+    try {
+      const searchQuery = `${restaurantName} Uber Eats`;
+      const duckDuckGoSearchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
+      
+      console.log(`🔍 DuckDuckGo search URL: ${duckDuckGoSearchUrl}`);
+      
+      const response = await axios.get(duckDuckGoSearchUrl, {
         timeout: 10000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -185,38 +236,89 @@ export class UberEatsSearchEngine {
         }
       });
       
-      if (response.status === 200) {
+      console.log(`✅ DuckDuckGo response status: ${response.status}`);
+      console.log(`📄 DuckDuckGo response length: ${response.data.length} characters`);
+      
+      if (response.status === 200 || response.status === 202) {
         const $ = cheerio.load(response.data);
         const results: RestaurantSearchResult[] = [];
         
-        // Extract UberEats URLs from Google search results
-        $('a[href*="ubereats.com"]').each((index, element) => {
-          const href = $(element).attr('href');
-          if (href && href.includes('ubereats.com/ca/store/')) {
-            const url = this.extractUberEatsUrl(href);
-            if (url) {
-              results.push({
-                name: restaurantName,
-                url: url,
-                location: 'Found via Google search',
-                rating: 4.0,
-                deliveryTime: '20-30 min'
-              });
-              console.log(`✅ Found via Google: ${url}`);
-            }
-          }
-        });
-        
-        return results;
+        return this.extractUberEatsUrlsFromDuckDuckGo(response.data, restaurantName);
+      } else {
+        console.log(`❌ DuckDuckGo returned status: ${response.status}`);
+        return [];
       }
       
-      return [];
-      
     } catch (error) {
-      console.error('❌ Google search failed:', error);
+      console.error('❌ DuckDuckGo search failed:', error);
+      console.error('❌ Error details:', {
+        message: (error as any).message,
+        code: (error as any).code,
+        status: (error as any).response?.status,
+        statusText: (error as any).response?.statusText
+      });
       return [];
     }
   }
+
+  /**
+   * Extract UberEats URLs from DuckDuckGo HTML response
+   * @private
+   */
+  private extractUberEatsUrlsFromDuckDuckGo(html: string, restaurantName: string): RestaurantSearchResult[] {
+    const results: RestaurantSearchResult[] = [];
+    
+    // Simple regex to find UberEats URLs
+    const uberEatsUrlRegex = /https:\/\/www\.ubereats\.com\/[^"'\s]+/g;
+    const matches = html.match(uberEatsUrlRegex);
+    
+    if (matches) {
+      console.log(`🔗 Found ${matches.length} UberEats URLs in DuckDuckGo results`);
+      
+      // Remove duplicates and filter for store URLs, limit to top 3
+      const uniqueUrls = [...new Set(matches)].filter(url => 
+        url.includes('/ca/store/')
+      ).slice(0, 3);
+      
+      console.log(`✅ Found ${uniqueUrls.length} unique UberEats store URLs`);
+      
+      uniqueUrls.forEach((url, index) => {
+        console.log(`  ${index + 1}. ${url}`);
+        
+        results.push({
+          name: restaurantName,
+          url: url,
+          location: this.extractLocationFromUrl(url),
+          rating: 4.0,
+          deliveryTime: '20-30 min'
+        });
+      });
+    } else {
+      console.log(`❌ No UberEats URLs found in DuckDuckGo results`);
+      console.log(`🔍 Raw DuckDuckGo response preview (first 1000 chars):`);
+      console.log(html.substring(0, 1000));
+    }
+    
+         return results;
+   }
+
+   /**
+    * Extract location from UberEats URL
+    * @private
+    */
+   private extractLocationFromUrl(url: string): string {
+     try {
+       const urlParts = url.split('/');
+       const storePart = urlParts.find(part => part.includes('-'));
+       if (storePart) {
+         const location = storePart.split('-').slice(-1)[0];
+         return location.charAt(0).toUpperCase() + location.slice(1);
+       }
+     } catch (error) {
+       console.error('Error extracting location from URL:', error);
+     }
+     return 'Unknown';
+   }
 
   /**
    * Extract clean UberEats URL from Google search result

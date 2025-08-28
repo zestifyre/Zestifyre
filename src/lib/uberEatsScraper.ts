@@ -111,8 +111,33 @@ export class UberEatsScraper {
     
     // Extract restaurant name from URL for mock data
     const urlParts = restaurantUrl.split('/');
-    const restaurantName = urlParts[urlParts.length - 1]?.replace(/-/g, ' ') || 'Mock Restaurant';
+    console.log('🔍 URL parts:', urlParts);
     
+    // Look for the store part in the URL
+    let restaurantName = 'Mock Restaurant';
+    
+    // Try to find the store identifier in the URL
+    const storeIndex = urlParts.findIndex(part => part === 'store');
+    if (storeIndex !== -1 && urlParts[storeIndex + 1]) {
+      const storePart = urlParts[storeIndex + 1];
+      console.log('🔍 Found store part:', storePart);
+      
+      // Clean up the store part
+      restaurantName = storePart
+        .replace(/-/g, ' ')
+        .replace(/\?.*$/, '')
+        .replace(/north-york/, '') // Remove location suffix
+        .trim();
+      
+      console.log('🔍 Extracted restaurant name:', restaurantName);
+    }
+    
+        // Generate generic menu items based on restaurant name
+    console.log('✅ Using generic menu for:', restaurantName);
+    
+    console.log('⚠️ Using default mock menu for:', restaurantName);
+    
+    // Default mock menu for other restaurants
     const mockMenuItems: MenuItem[] = [
       {
         id: '1',
