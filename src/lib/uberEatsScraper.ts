@@ -1,3 +1,5 @@
+import { discordLogger } from './discordLogger';
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -39,6 +41,7 @@ export class UberEatsScraper {
     restaurantUrl: string, 
     options: ScrapingOptions = {}
   ): Promise<RestaurantMenu> {
+    const startTime = Date.now();
     let lastError: Error | null = null;
     
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
@@ -51,6 +54,11 @@ export class UberEatsScraper {
         const menu = await this.mockScrape(restaurantUrl, options);
         
         console.log(`✅ Successfully scraped ${menu.menuItems.length} menu items`);
+        
+        // Log successful scraping to Discord
+        const duration = Date.now() - startTime;
+        await discordLogger.logScraper(restaurantUrl, menu.menuItems.length, true);
+        
         return menu;
         
       } catch (error) {
@@ -64,6 +72,10 @@ export class UberEatsScraper {
         }
       }
     }
+    
+    // Log failed scraping to Discord
+    const duration = Date.now() - startTime;
+    await discordLogger.logScraper(restaurantUrl, 0, false);
     
     throw new Error(`Failed to scrape restaurant menu after ${this.maxRetries} attempts: ${lastError?.message}`);
   }

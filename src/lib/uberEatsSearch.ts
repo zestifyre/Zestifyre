@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { discordLogger } from './discordLogger';
 
 export interface RestaurantSearchResult {
   name: string;
@@ -30,21 +31,31 @@ export class UberEatsSearchEngine {
     restaurantName: string,
     options: SearchOptions = {}
   ): Promise<RestaurantSearchResult[]> {
+    const startTime = Date.now();
+    
     try {
       console.log(`🔍 Searching for restaurant: "${restaurantName}"`);
       const results = await this.realSearch(restaurantName, options);
+      const duration = Date.now() - startTime;
 
       if (results.length > 0) {
         console.log(`✅ Found ${results.length} restaurants for "${restaurantName}"`);
+        // Log successful search to Discord
+        await discordLogger.logSearch(restaurantName, results, 'Multiple Methods', duration);
         return results;
       }
 
       console.log(`❌ No restaurants found for "${restaurantName}"`);
+      // Log failed search to Discord
+      await discordLogger.logSearch(restaurantName, [], 'All Methods Failed', duration);
       return [];
 
     } catch (error) {
+      const duration = Date.now() - startTime;
       console.error('❌ Error searching restaurants:', error);
       console.log(`❌ Search failed for "${restaurantName}"`);
+      // Log error to Discord
+      await discordLogger.logSearchFailure(restaurantName, 'Search Engine', error instanceof Error ? error.message : 'Unknown error');
       return [];
     }
   }
@@ -61,25 +72,35 @@ export class UberEatsSearchEngine {
     
     // Try each search method once, in order of preference
     const searchMethods = [
-      { name: 'DuckDuckGo', method: () => this.searchViaDuckDuckGo(restaurantName) },
       { name: 'Playwright', method: () => this.searchViaPlaywright(restaurantName) },
-      { name: 'SerpAPI', method: () => this.searchViaSerpAPI(restaurantName) }
+      { name: 'SerpAPI', method: () => this.searchViaSerpAPI(restaurantName) },
+      { name: 'DuckDuckGo', method: () => this.searchViaDuckDuckGo(restaurantName) },
+      { name: 'Direct URL', method: () => this.tryDirectUrl(restaurantName) }
     ];
     
     for (const searchMethod of searchMethods) {
+      const methodStartTime = Date.now();
       try {
         console.log(`🔍 Trying ${searchMethod.name} search...`);
         const results = await searchMethod.method();
+        const methodDuration = Date.now() - methodStartTime;
         
         if (results.length > 0) {
           console.log(`✅ ${searchMethod.name} found ${results.length} results`);
+          // Log successful method to Discord
+          await discordLogger.logSearch(restaurantName, results, searchMethod.name, methodDuration);
           return results;
         } else {
           console.log(`⚠️ ${searchMethod.name} returned no results`);
+          // Log failed method to Discord
+          await discordLogger.logSearch(restaurantName, [], searchMethod.name, methodDuration);
         }
-              } catch (_error) {
-          console.error(`❌ ${searchMethod.name} search failed:`, _error);
-        }
+      } catch (error) {
+        const methodDuration = Date.now() - methodStartTime;
+        console.error(`❌ ${searchMethod.name} search failed:`, error);
+        // Log method failure to Discord
+        await discordLogger.logSearchFailure(restaurantName, searchMethod.name, error instanceof Error ? error.message : 'Unknown error');
+      }
     }
     
     console.log(`❌ All search methods failed for "${restaurantName}"`);
