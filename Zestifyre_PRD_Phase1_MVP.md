@@ -12,6 +12,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 5. **Documentation**: All completed tasks must be marked as "✅ COMPLETED" in this document
 6. **Repository Privacy**: All GitHub repositories should be private by default (by invitation only)
 7. **Readability First**: Always prioritize text readability - ensure sufficient contrast between text and background colors, especially for input fields and form elements
+8. **Enter Key Functionality**: When creating input boxes, hitting Enter should perform the most logical next action. Consider: "nothing", "next field", "search", "submit". Examples: Search inputs should trigger search, form inputs should submit the form, multi-field forms should move to next field.
 
 ### **Core Value Proposition**
 - Generate professional-quality food images using AI
@@ -73,29 +74,38 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 
 ## **Data Flow & Processing**
 
-### **1. Restaurant Data Scraping**
+### **1. Restaurant Search Engine**
 - **Input**: Restaurant name from form
 - **Process**: 
-  - Search UberEats for restaurant name
-  - If exact match not found, show suggestions (fuzzy search)
-  - Scrape: food items, descriptions, existing images
+  - Search UberEats for restaurant name using multiple engines
+  - DuckDuckGo (primary), Playwright (fallback), SerpAPI (backup)
+  - Return UberEats URLs for found restaurants
 - **Retry Logic**: 3 attempts with exponential backoff
 - **Error Handling**: "Sorry, please try again later" message
 
-### **2. Data Storage (Supabase)**
+### **2. Menu Data Scraping**
+- **Input**: UberEats URLs from search engine
+- **Process**: 
+  - Extract menu items, descriptions, prices, images
+  - Handle anti-scraping measures
+  - Parse restaurant menu structure
+- **Retry Logic**: 3 attempts with different methods
+- **Error Handling**: Graceful degradation with partial data
+
+### **3. Data Storage (Supabase)**
 **Tables Structure:**
 - **users**: email, restaurant_name, created_at, status
 - **restaurants**: name, uber_eats_url, scraped_at, menu_items_count
 - **menu_items**: restaurant_id, name, description, price, category, has_image
 - **generated_images**: user_id, menu_item_id, image_url, status, created_at
 
-### **3. Image Generation Priority**
+### **4. Image Generation Priority**
 - **Selection Criteria**: Most expensive OR most popular item
 - **AI Prompt**: Combine food description + style reference from existing UberEats images
 - **Retry Logic**: 3 attempts with different prompts
 - **Error Handling**: Daily email alerts to admin
 
-### **4. Image Delivery**
+### **5. Image Delivery**
 - **Format**: High-resolution, UberEats-compliant specifications
 - **Storage**: Cloud storage (AWS S3 or similar)
 - **Download Link**: 30-day expiration
@@ -108,7 +118,8 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 ### **Discord Integration**
 - **Channel**: `#zestifyre-errors`
 - **Triggers**:
-  - UberEats scraping failures (after 3 retries)
+  - UberEats search failures (after 3 retries)
+  - Menu scraping failures (after 3 retries)
   - AI generation failures (after 3 retries)
   - Email delivery failures
   - Database connection issues
@@ -119,7 +130,8 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 - **Content**: Error summary, affected users, recommended actions
 
 ### **User-Facing Error Messages**
-- **Scraping Failure**: "Sorry, we couldn't find your restaurant. Please try again later."
+- **Search Failure**: "Sorry, we couldn't find your restaurant. Please try again later."
+- **Scraping Failure**: "Sorry, we couldn't load the menu. Please try again later."
 - **Generation Failure**: "Sorry, we're experiencing technical difficulties. Please try again later."
 - **Generic Error**: "Something went wrong. Please try again."
 
@@ -179,15 +191,27 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - **Testing**: ✅ Verified form validation, responsive design on mobile/desktop
 
 ### **Week 3: Core Functionality**
-- [ ] **Task 1.5**: Implement UberEats scraping
-  - [ ] Research UberEats page structure
-  - [ ] Create scraping function for restaurant search
-  - [ ] Implement menu item extraction
-  - [ ] Add image URL extraction
-  - [ ] Implement retry logic (3 attempts)
-  - **Testing**: Test with various restaurant names, verify data extraction accuracy
+- [x] **Task 1.5**: Implement UberEats Search Engine ✅ COMPLETED
+  - [x] Research search engine solutions (Playwright, SerpAPI, DuckDuckGo)
+  - [x] Implement multiple search engines with fallback logic
+  - [x] Create modular search architecture
+  - [x] Add comprehensive testing endpoints
+  - [x] Remove all hardcoded elements
+  - [x] Implement proper error handling and status reporting
+  - [x] Add Enter key functionality for search inputs
+  - [x] Optimize search order (DuckDuckGo first, then Playwright, then SerpAPI)
+  - [x] Create comprehensive test page with real-time status updates
+  - **Testing**: ✅ Verified search works with various restaurant names, DuckDuckGo is reliable, Enter key functionality working
 
-- [ ] **Task 1.6**: Set up DALL-E 3 integration
+- [ ] **Task 1.6**: Implement UberEats Menu Scraper
+  - [ ] Research UberEats page structure and anti-scraping measures
+  - [ ] Implement real menu item extraction (no mock data)
+  - [ ] Add image URL extraction from UberEats pages
+  - [ ] Create modular scraping architecture
+  - [ ] Implement retry logic and error handling
+  - **Testing**: Test with real UberEats URLs, verify accurate data extraction
+
+- [ ] **Task 1.7**: Set up DALL-E 3 integration
   - [ ] Create OpenAI API account
   - [ ] Implement DALL-E 3 API calls
   - [ ] Create prompt engineering for food images
@@ -195,7 +219,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - [ ] Implement retry logic for failed generations
   - **Testing**: Generate test images, verify quality and consistency
 
-- [ ] **Task 1.7**: Create image generation workflow
+- [ ] **Task 1.8**: Create image generation workflow
   - [ ] Build item selection logic (most expensive/popular)
   - [ ] Create image processing pipeline
   - [ ] Implement cloud storage (AWS S3)
@@ -203,7 +227,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - [ ] Add status tracking
   - **Testing**: End-to-end image generation workflow
 
-- [ ] **Task 1.8**: Build email system
+- [ ] **Task 1.9**: Build email system
   - [ ] Set up Gmail SMTP with Nodemailer
   - [ ] Create email templates
   - [ ] Implement token-based authentication links
@@ -212,28 +236,28 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - **Testing**: Send test emails, verify delivery and link functionality
 
 ### **Week 4: User Experience**
-- [ ] **Task 1.9**: Implement fuzzy search for restaurants
+- [ ] **Task 1.10**: Implement fuzzy search for restaurants
   - [ ] Research fuzzy search algorithms
   - [ ] Implement restaurant name matching
   - [ ] Create suggestion display
   - [ ] Add user selection interface
   - **Testing**: Test with various restaurant name variations
 
-- [ ] **Task 1.10**: Add error handling and retry logic
+- [ ] **Task 1.11**: Add error handling and retry logic
   - [ ] Implement comprehensive error handling
   - [ ] Add user-friendly error messages
   - [ ] Create retry mechanisms for all critical operations
   - [ ] Add error logging
   - **Testing**: Simulate various error scenarios
 
-- [ ] **Task 1.11**: Set up Discord monitoring
+- [ ] **Task 1.12**: Set up Discord monitoring
   - [ ] Create Discord server and channel
   - [ ] Set up webhook integration
   - [ ] Configure error alerts
   - [ ] Add daily digest functionality
   - **Testing**: Trigger test alerts, verify notification delivery
 
-- [ ] **Task 1.12**: Create download link system
+- [ ] **Task 1.13**: Create download link system
   - [ ] Implement secure token generation
   - [ ] Add 30-day expiration logic
   - [ ] Create download page
@@ -241,7 +265,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - **Testing**: Test link expiration, download functionality
 
 ### **Week 5-6: Payment Integration**
-- [ ] **Task 1.13**: Set up Stripe integration
+- [ ] **Task 1.14**: Set up Stripe integration
   - [ ] Create Stripe account and configure
   - [ ] Implement Stripe checkout
   - [ ] Set up webhook handling
@@ -249,7 +273,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - [ ] Implement refund functionality
   - **Testing**: Test payment flows, webhook processing
 
-- [ ] **Task 1.14**: Create item selection interface
+- [ ] **Task 1.15**: Create item selection interface
   - [ ] Design menu item display grid
   - [ ] Add item filtering (missing images, categories)
   - [ ] Implement item selection functionality
@@ -257,7 +281,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - [ ] Create shopping cart system
   - **Testing**: Test item selection, cart functionality
 
-- [ ] **Task 1.15**: Build checkout process
+- [ ] **Task 1.16**: Build checkout process
   - [ ] Create checkout page design
   - [ ] Implement Stripe Elements
   - [ ] Add order summary
@@ -265,7 +289,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - [ ] Set up order tracking
   - **Testing**: End-to-end checkout flow testing
 
-- [ ] **Task 1.16**: Create user dashboard
+- [ ] **Task 1.17**: Create user dashboard
   - [ ] Design dashboard layout
   - [ ] Add order history
   - [ ] Implement download management
@@ -274,28 +298,28 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - **Testing**: Dashboard functionality, user experience
 
 ### **Week 7-8: Testing & Polish**
-- [ ] **Task 1.17**: End-to-end testing
+- [ ] **Task 1.18**: End-to-end testing
   - [ ] Create comprehensive test suite
   - [ ] Test all user flows (free + paid)
   - [ ] Performance testing
   - [ ] Security testing
   - **Testing**: Full system integration testing
 
-- [ ] **Task 1.18**: Performance optimization
+- [ ] **Task 1.19**: Performance optimization
   - [ ] Optimize image loading
   - [ ] Implement caching strategies
   - [ ] Database query optimization
   - [ ] API response optimization
   - **Testing**: Load testing, performance benchmarking
 
-- [ ] **Task 1.19**: Error monitoring setup
+- [ ] **Task 1.20**: Error monitoring setup
   - [ ] Configure comprehensive error tracking
   - [ ] Set up alert thresholds
   - [ ] Create error dashboard
   - [ ] Implement automated recovery
   - **Testing**: Error simulation and monitoring verification
 
-- [ ] **Task 1.20**: Launch preparation
+- [ ] **Task 1.21**: Launch preparation
   - [ ] Final security review
   - [ ] Documentation completion
   - [ ] Team training
@@ -421,7 +445,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
 
 ### **Current Phase**: Phase 1 - MVP Development (Free + Paid)
 ### **Current Status**: 🎉 MILESTONE COMPLETED - MVP Foundation Ready
-### **Next Task**: Task 1.5 - Implement UberEats scraping
+### **Next Task**: Task 1.6 - Implement UberEats Menu Scraper
 
 ### **Completed Tasks**: 
 - ✅ Task 1.1: Next.js setup with TypeScript

@@ -34,35 +34,22 @@ export class PlaywrightSearchEngine {
     restaurantName: string,
     options: SearchOptions = {}
   ): Promise<RestaurantSearchResult[]> {
-    let lastError: Error | null = null;
-    
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-      try {
-        console.log(`🔍 Playwright search attempt ${attempt}/${this.maxRetries} for "${restaurantName}"`);
-        
-        const results = await this.performSearch(restaurantName, options);
-        
-        if (results.length > 0) {
-          console.log(`✅ Playwright found ${results.length} restaurants for "${restaurantName}"`);
-          return results;
-        }
-        
-        console.log(`❌ No results found on attempt ${attempt}`);
-        
-      } catch (error) {
-        lastError = error as Error;
-        console.error(`❌ Playwright search attempt ${attempt} failed:`, error);
-        
-        if (attempt < this.maxRetries) {
-          const delay = this.retryDelay * Math.pow(2, attempt - 1);
-          console.log(`⏳ Retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
+    try {
+      console.log(`🔍 Playwright: Searching for "${restaurantName}"`);
+      const results = await this.performSearch(restaurantName, options);
+      
+      if (results.length > 0) {
+        console.log(`✅ Playwright found ${results.length} restaurants for "${restaurantName}"`);
+        return results;
       }
+      
+      console.log(`⚠️ Playwright returned no results for "${restaurantName}"`);
+      return [];
+      
+    } catch (error) {
+      console.error('❌ Playwright search failed:', error);
+      return [];
     }
-    
-    console.error('❌ All Playwright search attempts failed');
-    return [];
   }
 
   /**
@@ -77,7 +64,9 @@ export class PlaywrightSearchEngine {
     
     try {
       // Set realistic user agent and viewport
-      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      await page.setExtraHTTPHeaders({
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      });
       await page.setViewportSize({ width: 1920, height: 1080 });
       
       // Add realistic browser behavior

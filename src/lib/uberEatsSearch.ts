@@ -50,58 +50,40 @@ export class UberEatsSearchEngine {
   }
 
   /**
-   * Real UberEats search implementation
+   * Real UberEats search implementation - try each method once
    * @private
    */
   private async realSearch(
     restaurantName: string, 
     options: SearchOptions
   ): Promise<RestaurantSearchResult[]> {
-    let lastError: Error | null = null;
+    console.log(`🔍 Trying search methods for "${restaurantName}"`);
     
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+    // Try each search method once, in order of preference
+    const searchMethods = [
+      { name: 'DuckDuckGo', method: () => this.searchViaDuckDuckGo(restaurantName) },
+      { name: 'Playwright', method: () => this.searchViaPlaywright(restaurantName) },
+      { name: 'SerpAPI', method: () => this.searchViaSerpAPI(restaurantName) }
+    ];
+    
+    for (const searchMethod of searchMethods) {
       try {
-        console.log(`🔍 Real search attempt ${attempt}/${this.maxRetries} for "${restaurantName}"`);
+        console.log(`🔍 Trying ${searchMethod.name} search...`);
+        const results = await searchMethod.method();
         
-        // Method 1: Try Playwright search (bypasses bot detection)
-        const playwrightResults = await this.searchViaPlaywright(restaurantName);
-        if (playwrightResults.length > 0) {
-          return playwrightResults;
+        if (results.length > 0) {
+          console.log(`✅ ${searchMethod.name} found ${results.length} results`);
+          return results;
+        } else {
+          console.log(`⚠️ ${searchMethod.name} returned no results`);
         }
-        
-        // Method 2: Try SerpAPI search (reliable API service)
-        const serpApiResults = await this.searchViaSerpAPI(restaurantName);
-        if (serpApiResults.length > 0) {
-          return serpApiResults;
-        }
-        
-        // Method 3: Try DuckDuckGo search for UberEats URLs (fallback)
-        const duckDuckGoResults = await this.searchViaDuckDuckGo(restaurantName);
-        if (duckDuckGoResults.length > 0) {
-          return duckDuckGoResults;
-        }
-        
-        // Method 3: Try UberEats search page scraping (if we can access it)
-        const scrapeResults = await this.scrapeSearchPage(restaurantName);
-        if (scrapeResults.length > 0) {
-          return scrapeResults;
-        }
-        
-        throw new Error('All search methods failed');
-        
       } catch (error) {
-        lastError = error as Error;
-        console.error(`❌ Search attempt ${attempt} failed:`, error);
-        
-        if (attempt < this.maxRetries) {
-          const delay = this.retryDelay * Math.pow(2, attempt - 1); // Exponential backoff
-          console.log(`⏳ Retrying in ${delay}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-        }
+        console.error(`❌ ${searchMethod.name} search failed:`, error);
       }
     }
     
-    throw new Error(`Failed to search after ${this.maxRetries} attempts: ${lastError?.message}`);
+    console.log(`❌ All search methods failed for "${restaurantName}"`);
+    return [];
   }
 
   /**

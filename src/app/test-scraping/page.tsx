@@ -36,6 +36,8 @@ export default function TestScrapingPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isScraping, setIsScraping] = useState(false);
   const [error, setError] = useState('');
+  const [errorDetails, setErrorDetails] = useState<any>(null);
+  const [searchStatus, setSearchStatus] = useState<string>('');
 
   const testSearch = async () => {
     if (!restaurantName.trim()) {
@@ -45,6 +47,8 @@ export default function TestScrapingPage() {
 
     setIsSearching(true);
     setError('');
+    setErrorDetails(null);
+    setSearchStatus('🔍 Starting search...');
     setSearchResults([]);
     setSelectedRestaurant(null);
     setMenuData(null);
@@ -56,12 +60,21 @@ export default function TestScrapingPage() {
 
       if (data.success) {
         setSearchResults(data.results);
+        if (data.results.length > 0) {
+          setSearchStatus(`✅ Search completed: ${data.results.length} results found`);
+        } else {
+          setSearchStatus('⚠️ No results found - all search engines may be blocked');
+        }
         console.log('✅ Search results:', data);
       } else {
         setError(data.error || 'Search failed');
+        setErrorDetails(data);
+        setSearchStatus('❌ Search failed');
       }
     } catch (error) {
       setError('Failed to search restaurants');
+      setErrorDetails({ error: error instanceof Error ? error.message : 'Unknown error' });
+      setSearchStatus('❌ Search failed');
       console.error('❌ Search error:', error);
     } finally {
       setIsSearching(false);
@@ -71,6 +84,7 @@ export default function TestScrapingPage() {
   const testScraping = async (restaurant: SearchResult) => {
     setIsScraping(true);
     setError('');
+    setErrorDetails(null);
     setMenuData(null);
 
     try {
@@ -91,9 +105,11 @@ export default function TestScrapingPage() {
         console.log('✅ Menu data:', data);
       } else {
         setError(data.error || 'Scraping failed');
+        setErrorDetails(data);
       }
     } catch (error) {
       setError('Failed to scrape menu');
+      setErrorDetails({ error: error instanceof Error ? error.message : 'Unknown error' });
       console.error('❌ Scraping error:', error);
     } finally {
       setIsScraping(false);
@@ -103,17 +119,22 @@ export default function TestScrapingPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">🧪 Task 1.5: UberEats Scraping Test</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">🧪 Task 1.5 & 1.6: UberEats Search & Scraping Test</h1>
         
         {/* Search Component Test */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">🔍 Component 1: UberEats Search Engine</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">🔍 Component 1: UberEats Search Engine (Task 1.5 - COMPLETED)</h2>
           
           <div className="flex gap-4 mb-6">
             <input
               type="text"
               value={restaurantName}
               onChange={(e) => setRestaurantName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isSearching) {
+                  testSearch();
+                }
+              }}
               placeholder="Enter restaurant name (e.g., Bao House, Pizza Palace)"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-500"
             />
@@ -125,10 +146,24 @@ export default function TestScrapingPage() {
               {isSearching ? 'Searching...' : 'Search'}
             </button>
           </div>
+          
+          {searchStatus && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="text-blue-700 text-sm">{searchStatus}</div>
+            </div>
+          )}
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-              {error}
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-red-700 font-medium mb-2">❌ Error: {error}</div>
+              {errorDetails && (
+                <details className="text-sm text-red-600">
+                  <summary className="cursor-pointer hover:text-red-800">Click to see error details</summary>
+                  <pre className="mt-2 p-2 bg-red-100 rounded text-xs overflow-auto max-h-40">
+                    {JSON.stringify(errorDetails, null, 2)}
+                  </pre>
+                </details>
+              )}
             </div>
           )}
 
@@ -164,11 +199,46 @@ export default function TestScrapingPage() {
           )}
         </div>
 
+        {/* Manual URL Input for Testing */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">🔗 Manual URL Test (When Search Fails)</h2>
+          <div className="flex gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Enter UberEats URL manually (e.g., https://www.ubereats.com/ca/store/...)"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-500"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  const url = e.currentTarget.value;
+                  if (url) {
+                    testScraping({ name: 'Manual Test', url: url });
+                  }
+                }
+              }}
+            />
+            <button
+              onClick={() => {
+                const url = document.querySelector('input[placeholder*="Enter UberEats URL"]') as HTMLInputElement;
+                if (url?.value) {
+                  testScraping({ name: 'Manual Test', url: url.value });
+                }
+              }}
+              disabled={isScraping}
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+            >
+              {isScraping ? 'Scraping...' : 'Test Scraper'}
+            </button>
+          </div>
+          <p className="text-sm text-gray-600">
+            Use this when the search engine is blocked. You can manually enter any UberEats URL to test the scraper.
+          </p>
+        </div>
+
         {/* Scraping Component Test */}
-        {selectedRestaurant && (
+        {(selectedRestaurant || menuData) && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              🍽️ Component 2: Menu Scraper - {selectedRestaurant.name}
+              🍽️ Component 2: Menu Scraper (Task 1.6 - IN PROGRESS) - {selectedRestaurant.name}
             </h2>
             
             {isScraping && (
