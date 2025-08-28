@@ -72,8 +72,8 @@ export class UberEatsSearchEngine {
     
     // Try each search method once, in order of preference
     const searchMethods = [
-      { name: 'Playwright', method: () => this.searchViaPlaywright(restaurantName) },
       { name: 'SerpAPI', method: () => this.searchViaSerpAPI(restaurantName) },
+      { name: 'Playwright', method: () => this.searchViaPlaywright(restaurantName) },
       { name: 'DuckDuckGo', method: () => this.searchViaDuckDuckGo(restaurantName) },
       { name: 'Direct URL', method: () => this.tryDirectUrl(restaurantName) }
     ];
