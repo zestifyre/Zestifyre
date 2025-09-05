@@ -205,7 +205,7 @@ Zestifyre is a web application that generates high-quality AI menu images for Ub
   - [x] **Discord logging integration for production monitoring**
   - [x] **Vercel deployment compatibility and environment variable setup**
   - **Testing**: ✅ Verified search works with various restaurant names, SerpAPI is reliable, Enter key functionality working
-  - **Production**: ✅ Successfully deployed and tested on Vercel with Discord logging
+  - **Production**: ✅ Successfully deployed and tested on Vercel with Discord logging (ZestiBoti webhook)
 
 - [ ] **Task 1.6**: Implement UberEats Menu Scraper
   - [ ] Research UberEats page structure and anti-scraping measures
