@@ -54,7 +54,6 @@ export default function TestScrapingPage() {
     setMenuData(null);
 
     try {
-      console.log(`🔍 Testing search for: "${restaurantName}"`);
       const response = await fetch(`/api/test-search?restaurant=${encodeURIComponent(restaurantName)}&max=5`);
       const data = await response.json();
 
@@ -130,7 +129,7 @@ export default function TestScrapingPage() {
               type="text"
               value={restaurantName}
               onChange={(e) => setRestaurantName(e.target.value)}
-              onKeyDown={(e) => {
+              onKeyPress={(e) => {
                 if (e.key === 'Enter' && !isSearching) {
                   testSearch();
                 }
@@ -145,11 +144,18 @@ export default function TestScrapingPage() {
             >
               {isSearching ? 'Searching...' : 'Search'}
             </button>
+
           </div>
           
           {searchStatus && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <div className="text-blue-700 text-sm">{searchStatus}</div>
+            </div>
+          )}
+          
+          {isSearching && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="text-yellow-700 text-sm">⏳ Searching... Please wait</div>
             </div>
           )}
 
@@ -208,7 +214,7 @@ export default function TestScrapingPage() {
               placeholder="Enter UberEats URL manually (e.g., https://www.ubereats.com/ca/store/...)"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-500"
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !isScraping) {
                   const url = e.currentTarget.value;
                   if (url) {
                     testScraping({ name: 'Manual Test', url: url });

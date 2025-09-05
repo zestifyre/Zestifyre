@@ -1,12 +1,12 @@
-# Zeptifier 🍽️
+# ZestiFyre
 
 AI-generated menu images that BOOST your UberEats sales.
 
-## 🌐 Live Demo
+## Live Demo
 
 **Visit:** [https://zestifyre.vercel.app/](https://zestifyre.vercel.app/)
 
-## 🚀 Features
+## Features
 
 - **Free AI-generated menu images** for UberEats restaurants
 - **Smart restaurant matching** with fuzzy search
@@ -14,7 +14,7 @@ AI-generated menu images that BOOST your UberEats sales.
 - **Email delivery** with secure download links
 - **Paid image generation** for additional menu items
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: Next.js 15, React 18, TypeScript
 - **Styling**: Tailwind CSS, Framer Motion
@@ -25,7 +25,7 @@ AI-generated menu images that BOOST your UberEats sales.
 - **Deployment**: Vercel
 - **Storage**: AWS S3 (planned)
 
-## 🏃‍♂️ Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -59,25 +59,25 @@ AI-generated menu images that BOOST your UberEats sales.
 
 5. **Open [http://localhost:3000](http://localhost:3000)** in your browser
 
-## 📋 Development Status
+## Development Status
 
-### ✅ Completed
+### Completed
 - [x] Next.js project setup
 - [x] Supabase database configuration
 - [x] Vercel deployment
 - [x] Landing page with form validation
 
-### 🚧 In Progress
+### In Progress
 - [ ] UberEats scraping functionality
 - [ ] DALL-E 3 image generation
 - [ ] Email system integration
 
-### 📅 Planned
+### Planned
 - [ ] Stripe payment integration
 - [ ] User dashboard
 - [ ] Analytics and optimization
 
-## 🔧 Available Scripts
+## Available Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
@@ -85,20 +85,20 @@ AI-generated menu images that BOOST your UberEats sales.
 - `npm run lint` - Run ESLint
 - `npm run type-check` - Run TypeScript checks
 
-## 📚 Documentation
+## Documentation
 
 - [Product Requirements Document](./Zestifyre_PRD_Phase1_MVP.md)
 - [Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)
 - [Supabase Schema](./supabase-schema.sql)
 
-## 🤝 Contributing
+## Contributing
 
 This is a private repository. Please contact the maintainers for access.
 
-## 📄 License
+## License
 
 Private project - All rights reserved.
 
 ---
 
-**Built with ❤️ using Next.js and Supabase**
+**Built with Next.js and Supabase**

@@ -40,7 +40,7 @@ export class DiscordLogger {
       fields: fields,
       timestamp: new Date().toISOString(),
       footer: {
-        text: 'Zeptifier Search Engine'
+        text: 'ZestiFyre Search Engine'
       }
     };
 
@@ -123,6 +123,36 @@ export class DiscordLogger {
   }
 
   /**
+   * Log research analysis results
+   */
+  async logResearch(restaurantUrl: string, analysis: {
+    menuItemsFound: number;
+    performance: { loadTime: number; javascriptRendered: boolean };
+    structure: { antiScrapingMeasures: string[]; selectors: string[] };
+    errors: string[];
+  }) {
+    const success = analysis.menuItemsFound > 0;
+    const level = success ? 'success' : 'warn';
+    
+    await this.log(
+      `UberEats page analysis completed`,
+      {
+        level,
+        title: success ? '🔍 Research Successful' : '⚠️ Research Limited',
+        fields: [
+          { name: 'Restaurant URL', value: restaurantUrl, inline: false },
+          { name: 'Menu Items Found', value: analysis.menuItemsFound.toString(), inline: true },
+          { name: 'Load Time', value: `${analysis.performance.loadTime}ms`, inline: true },
+          { name: 'JavaScript Rendered', value: analysis.performance.javascriptRendered ? 'Yes' : 'No', inline: true },
+          { name: 'Anti-Scraping Measures', value: analysis.structure.antiScrapingMeasures.length.toString(), inline: true },
+          { name: 'Selectors Found', value: analysis.structure.selectors.length.toString(), inline: true },
+          { name: 'Errors', value: analysis.errors.length.toString(), inline: true }
+        ]
+      }
+    );
+  }
+
+  /**
    * Log system status
    */
   async logSystemStatus(status: string, details?: string) {
@@ -132,6 +162,23 @@ export class DiscordLogger {
         level: 'info',
         title: '🖥️ System Status',
         fields: details ? [{ name: 'Details', value: details, inline: false }] : []
+      }
+    );
+  }
+
+  /**
+   * Log errors
+   */
+  async logError(message: string, error: Error) {
+    await this.log(
+      `${message}: ${error.message}`,
+      {
+        level: 'error',
+        title: '❌ Error',
+        fields: [
+          { name: 'Error Type', value: error.name, inline: true },
+          { name: 'Stack Trace', value: error.stack?.split('\n')[0] || 'No stack trace', inline: false }
+        ]
       }
     );
   }
