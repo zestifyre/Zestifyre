@@ -1,4 +1,4 @@
-# Supabase Setup Guide for Zeptifier
+# Supabase Setup Guide for Zestifyre
 
 ## Step 1: Get Your Supabase Project URL and Anon Key
 

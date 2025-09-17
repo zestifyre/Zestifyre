@@ -1,4 +1,4 @@
-# Vercel Deployment Guide for Zeptifier
+# Vercel Deployment Guide for Zestifyre
 
 ## Step 1: Connect GitHub to Vercel
 

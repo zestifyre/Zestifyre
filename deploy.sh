@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Zeptifier Deployment Script
-echo "🚀 Deploying Zeptifier to Vercel..."
+# Zestifyre Deployment Script
+echo "🚀 Deploying Zestifyre to Vercel..."
 
 # Check if we're in the right directory
 if [ ! -f "package.json" ]; then
