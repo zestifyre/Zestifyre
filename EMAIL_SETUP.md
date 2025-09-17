@@ -1,5 +1,10 @@
 # Email Setup Guide for Zestifyre
 
+## 📧 Your Current Setup
+- **Domain**: `zestifyre.com` ✅
+- **Email**: `admin@zestifyre.com` ✅
+- **Service**: Resend (to be configured)
+
 ## 🚀 Quick Setup with Resend (Recommended)
 
 ### Step 1: Create Resend Account
@@ -13,11 +18,12 @@
 3. Name it "Zestifyre Production"
 4. Copy the API key (starts with `re_`)
 
-### Step 3: Set Up Domain (Optional but Recommended)
+### Step 3: Set Up Your Custom Domain (Required)
 1. Go to [Domains](https://resend.com/domains) in your dashboard
-2. Add your domain (e.g., `zestifyre.com`)
-3. Follow DNS setup instructions
+2. Add your domain: `zestifyre.com`
+3. Follow DNS setup instructions to add SPF/DKIM records
 4. This improves deliverability and removes "via resend.com" from emails
+5. **Important**: You must verify `zestifyre.com` before emails will work
 
 ### Step 4: Configure Environment Variables
 Create a `.env.local` file in your project root:
@@ -25,7 +31,7 @@ Create a `.env.local` file in your project root:
 ```env
 # Email Configuration
 RESEND_API_KEY=re_your-actual-api-key-here
-RESEND_FROM_EMAIL=noreply@zestifyre.com
+RESEND_FROM_EMAIL=admin@zestifyre.com
 ```
 
 ### Step 5: Test Email Sending

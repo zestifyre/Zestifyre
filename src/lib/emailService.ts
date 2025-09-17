@@ -103,7 +103,7 @@ This email was sent to ${email} because you requested a free AI-generated menu i
     `;
 
     const result = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'noreply@zestifyre.com',
+      from: process.env.RESEND_FROM_EMAIL || 'admin@zestifyre.com',
       to: [email],
       subject: `Welcome to Zestifyre - Free Menu Image for ${restaurantName}`,
       html: emailHtml,
@@ -180,7 +180,7 @@ export async function sendSampleImageEmail(data: EmailData & { imageUrl: string 
     `;
 
     const result = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'noreply@zestifyre.com',
+      from: process.env.RESEND_FROM_EMAIL || 'admin@zestifyre.com',
       to: [email],
       subject: `Your Free Sample Image is Ready - ${restaurantName}`,
       html: emailHtml,
