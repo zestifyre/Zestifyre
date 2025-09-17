@@ -102,17 +102,17 @@ export default function Home() {
                   </svg>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                  Request Received!
+                  Check your email!
                 </h1>
                 <p className="text-xl text-gray-600 mb-6">
-                  We&apos;ve received your request for a free AI-generated menu image:
+                  We&apos;ve sent your welcome email to:
                 </p>
                 <div className="bg-white rounded-lg border border-gray-200 p-4 mb-8">
                   <p className="text-lg font-semibold text-gray-900">{email}</p>
                 </div>
                 <p className="text-gray-600 mb-8">
-                  Thank you for your interest! We&apos;ve received your request and will be in touch soon. 
-                  Our team will review your submission and contact you about your free AI-generated menu image.
+                  Please check your inbox (and spam folder) for an email from Zestifyre. 
+                  We&apos;ll be in touch soon with your free AI-generated menu image sample!
                 </p>
               </div>
 
