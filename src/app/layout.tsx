@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZestiFyre - AI-Generated Menu Images for UberEats",
+  title: "Zestifyre - AI-Generated Menu Images for UberEats",
   description: "Generate professional-quality food images using AI to boost your UberEats restaurant sales",
 };
 
