@@ -115,7 +115,7 @@ This email was sent to ${email} because you requested a free AI-generated menu i
 
   } catch (error) {
     console.error('Error sending email:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
@@ -191,6 +191,6 @@ export async function sendSampleImageEmail(data: EmailData & { imageUrl: string 
 
   } catch (error) {
     console.error('Error sending sample image email:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
