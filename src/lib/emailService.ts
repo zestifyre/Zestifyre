@@ -2,6 +2,13 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Debug: Check if API key is loaded
+if (!process.env.RESEND_API_KEY) {
+  console.error('❌ RESEND_API_KEY not found in environment variables');
+} else {
+  console.log('✅ RESEND_API_KEY loaded:', process.env.RESEND_API_KEY.substring(0, 10) + '...');
+}
+
 export interface EmailData {
   restaurantName: string;
   email: string;

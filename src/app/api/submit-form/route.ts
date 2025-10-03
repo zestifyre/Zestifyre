@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     console.log('Form submission received:', { restaurantName, email, timestamp: new Date().toISOString() });
 
     // Send welcome email
+    console.log('📧 Attempting to send welcome email...');
     const emailResult = await sendWelcomeEmail({
       restaurantName,
       email,
@@ -34,8 +35,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!emailResult.success) {
-      console.error('Failed to send email:', emailResult.error);
+      console.error('❌ Failed to send email:', emailResult.error);
       // Don't fail the request if email fails, just log it
+    } else {
+      console.log('✅ Email sent successfully:', emailResult.messageId);
     }
 
     // TODO: Start image generation process
